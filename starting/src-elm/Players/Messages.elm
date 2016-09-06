@@ -1,5 +1,9 @@
 module Players.Messages exposing (..)
 
+import Http
+import Players.Models exposing (PlayerID, Player)
+
 
 type Msg
-    = NoOp
+    = FetchAllDone (List Player)
+    | FetchAllFail Http.Error
