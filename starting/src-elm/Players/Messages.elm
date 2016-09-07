@@ -9,3 +9,6 @@ type Msg
     | FetchAllFail Http.Error
     | ShowPlayers
     | ShowPlayer PlayerID
+    | ChangeLevel PlayerID Int
+    | SaveSuccess Player
+    | SaveFail Http.Error
