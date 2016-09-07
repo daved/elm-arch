@@ -114,9 +114,9 @@ func cors(next http.Handler) http.Handler {
 
 func main() {
 	m := mixmux.NewRouter(nil)
-	m.Options("/players", cors(optionsHandler("GET")))
+	m.Options("/players", cors(optionsHandler(http.MethodGet)))
 	m.Get("/players", cors(http.HandlerFunc(playersGetHandler)))
-	m.Options("/players/:id", cors(optionsHandler("PATCH")))
+	m.Options("/players/:id", cors(optionsHandler(http.MethodPatch)))
 	m.Patch("/players/:id", cors(http.HandlerFunc(playersPatchHandler)))
 
 	if err := http.ListenAndServe(":4000", m); err != nil {
