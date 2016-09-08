@@ -5,9 +5,9 @@ import (
 	"fmt"
 	"net/http"
 	"os"
-	"strings"
 	"sync"
 
+	"github.com/codemodus/chain"
 	"github.com/codemodus/mixmux"
 	"github.com/codemodus/parth"
 )
@@ -90,14 +90,6 @@ func playersPatchHandler(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func optionsHandler(opts ...string) http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {
-		w.Header().Set("Access-Control-Allow-Methods", strings.Join(opts, ", "))
-		w.Header().Set("Access-Control-Allow-Headers",
-			"Origin, Accept, Content-Type, Content-Length, Accept-Encoding")
-	}
-}
-
 func cors(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		o := r.Header.Get("Origin")
@@ -113,11 +105,14 @@ func cors(next http.Handler) http.Handler {
 }
 
 func main() {
+	c := chain.New(cors)
 	m := mixmux.NewRouter(nil)
-	m.Options("/players", cors(optionsHandler(http.MethodGet)))
-	m.Get("/players", cors(http.HandlerFunc(playersGetHandler)))
-	m.Options("/players/:id", cors(optionsHandler(http.MethodPatch)))
-	m.Patch("/players/:id", cors(http.HandlerFunc(playersPatchHandler)))
+
+	m.Get("/players", c.EndFn(playersGetHandler))
+	m.OptionsAuto("/players", c.End, nil)
+
+	m.Patch("/players/:id", c.EndFn(playersPatchHandler))
+	m.OptionsAuto("/players/:id", c.End, nil)
 
 	if err := http.ListenAndServe(":4000", m); err != nil {
 		fmt.Fprintln(os.Stderr, err)
